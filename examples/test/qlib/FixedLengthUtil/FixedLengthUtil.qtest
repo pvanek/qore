@@ -124,7 +124,8 @@ class Test inherits QUnit::Test {
         addTestCase("FixedLengthUtil padding test #1", \test_padding_1());
         addTestCase("FixedLengthUtil padding test #2", \test_padding_2());
         addTestCase("FixedLengthUtil padding test #3", \test_padding_3());
-        set_return_value(main());
+        addTestCase("FixedLengthUtil non-numeric values test", \test_non_numeric());
+        set_return_value(main()); # compatibility with test harness that checks return value.
     }
 
     basicTests() {
@@ -162,5 +163,19 @@ class Test inherits QUnit::Test {
     test_padding_3() {
         FixedLengthDataWriter pw3(PADDING_SPEC);
         testAssertionValue("file content check - padding of floats", pw3.write(PADDING_DATA3), PADDING_OUTPUT3);
+    }
+
+    test_non_numeric() {
+        hash specs = ("t": ("f": ("length": 5, "type": "float"),
+                            "i": ("length": 5, "type": "int")));
+        string input = " 1.2x  1x2\n";
+
+        FixedLengthDataIterator i(input, specs, GlobalOptions);
+
+        code test_closure = sub () {
+            i.next();
+            i.getValue();
+        };
+        testAssertion ("Non-numeric field value", test_closure, (), new TestResultExceptionType("FIELD-VALUE-ERROR"));
     }
 }
