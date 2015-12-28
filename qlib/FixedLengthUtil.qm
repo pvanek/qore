@@ -315,6 +315,8 @@ my hash $h = $i.getValue();
     any transform(any value, hash type) {
         switch (type.type) {
             case "int": {
+                if (value.typeCode() == NT_STRING && !is_int(value))
+                    throw "FIELD-VALUE-ERROR", sprintf("invalid %s value: %y", type.type, value);
                 return int(value);
             }
 
@@ -329,15 +331,19 @@ my hash $h = $i.getValue();
 
             case "float": {
                 if (value.typeCode() == NT_STRING) {
-                    *string nf = type.format ? type.format : m_opts.number_format;
-                    return nf ? parse_float(value, nf) : float(value);
+                    if (*string nf = type.format ? type.format : m_opts.number_format)
+                        return parse_float(value, nf); # TODO: make it strict once there's such support in Qore (see #305 on GitHub)
+                    if (!is_int(value) and !is_float(value))
+                        throw "FIELD-VALUE-ERROR", sprintf("invalid %s value: %y", type.type, value);
                 }
                 return float(value);
             }
             case "number": {
                 if (value.typeCode() == NT_STRING) {
-                    *string nf = type.format ? type.format : m_opts.number_format;
-                    return nf ? parse_number(value, nf) : number(value);
+                    if (*string nf = type.format ? type.format : m_opts.number_format)
+                        return parse_number(value, nf); # TODO: make it strict once there's such support in Qore (see #305 on GitHub)
+                    if (!is_int(value) and !is_float(value) and !is_number(value))
+                        throw "FIELD-VALUE-ERROR", sprintf("invalid %s value: %y", type.type, value);
                 }
                 return number(value);
             }
