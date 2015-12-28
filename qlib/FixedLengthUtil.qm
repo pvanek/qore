@@ -647,8 +647,7 @@ public class FixedLengthUtil::FixedLengthAbstractWriter {
     */
     constructor(hash specs, *hash opts) {
         m_specs = specs;
-        delete opts.eol;
-        m_opts = m_opts + checkOptions(opts);
+        m_opts += checkOptions(opts);
 
         # validate padding options
         HashIterator hit(specs);
@@ -680,7 +679,6 @@ public class FixedLengthUtil::FixedLengthAbstractWriter {
                     if (!inlist(i.value, EOLS)) {
                         throw errname, sprintf("expecting a known end of line value to option %y; got %y (type %s) instead", i.key, i.value, i.value.type());
                     }
-                    opts.eol = i.value;
                     break;
                 }
             }
